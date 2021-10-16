@@ -57,13 +57,14 @@ class ProductCreateValidateSerializer(serializers.Serializer):
     category = serializers.IntegerField()
     tags = serializers.ListField(child=serializers.IntegerField())
 
+
     def validate_title(self, title):
         product = Product.objects.get(title=title)
         if product.count() > 0:
             raise ValidationError('Продукт с таким именем уже существует!')
         return title
 
-    def validate_price(self, title):
-        if int() < 0:
+    def validate_price(self, price):
+        if price < 0:
             raise ValidationError('Всымсле отрицательное цисло!')
-        return
+        return price

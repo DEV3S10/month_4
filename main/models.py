@@ -10,6 +10,7 @@ class Category(models.Model):
         'self', null=True, blank=True, related_name='children', on_delete=models.CASCADE
     )
 
+
     def save(self, *args, **kwargs):
         if self.id and self.parent and self.id == self.parent.id:
             self.parent = None
@@ -21,6 +22,7 @@ class Category(models.Model):
 
 class Tag(models.Model):
     name = models.CharField(max_length=70)
+    is_active = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

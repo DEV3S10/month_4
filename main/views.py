@@ -6,7 +6,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .serializers import ProductListSerializer, ProductsActiveTagsListSerializer, CategoryListSerializer, ProductsReviewListSerializer
+from .serializers import *
 from .models import Product, Category, ConfirmCode
 # Create your views here.
 
@@ -29,12 +29,23 @@ def products_item_view(request, pk):
         products.delete()
         return Response(data={'massage': 'Product removed!!!'})
     elif request.method == 'PUT':
-        products.title = request.data.get('title')
-        products.description = request.data.get('description')
-        products.price = request.data.get('price')
+        serializer = ProductCreateValidateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(data={
+                "massage": "error",
+                "errors": serializer.errors
+            }, status=status.HTTP_404_NOT_FOUND)
+        title = request.data.get('title')
+        description = request.data.get('description')
+        price = request.data.get('price')
+        category = Category.objects.get(id=request.data.get('category'))
+        product = Product.objects.create(title=title, description=description, price=price, category=category)
+        product.tags.set(request.data['tags'])
+
         products.save()
         return Response(data={'massage': 'Product updated',
-                              'products': ProductListSerializer(Product).data})
+                              'products': ProductListSerializer(product).data})
+    products = Product.objects.all()
     data = ProductListSerializer(products, many=False).data
     return Response(data=data)
 
